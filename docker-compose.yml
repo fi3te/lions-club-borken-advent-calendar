@@ -1,0 +1,9 @@
+services:
+  server:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.armv8
+    volumes:
+      - ./.env:/app/.env
+      - ./config.yml:/app/config.yml

@@ -1,0 +1,11 @@
+url: https://lionsclub.borkenerzeitung.de/#gewinner
+content-css-path: html body div div div div#nav-tabContent div#gewinner div#result
+location: Europe/Berlin
+time: 06:00
+first-retry-after-error-in-seconds: 5
+email:
+  sender:
+    address: forename1.surname@asdfasdfasdfasdfasdfadsfadsf.de
+    name: Forename1 Surname
+  recipients:
+    - forename2.surname@asdfasdfasdfasdfasdfadsfadsf.de

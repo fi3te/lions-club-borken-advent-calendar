@@ -1,0 +1,18 @@
+FROM arm64v8/golang:1.25-trixie as builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . ./
+RUN GOOS=linux GOARCH=arm GOARM=8 CGO_ENABLED=0 go build -o main ./cmd/main.go
+
+FROM arm64v8/debian:12.12-slim as runner
+WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/main ./main
+RUN groupadd -g 999 nonroot && \
+    useradd -r -u 999 -g nonroot nonroot
+USER nonroot
+ENTRYPOINT ["/app/main"]
