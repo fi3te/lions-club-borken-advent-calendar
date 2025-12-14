@@ -3,5 +3,6 @@
 .vscode/
 .env
 config.yml
+state.yml
 Dockerfile*
 docker-compose*

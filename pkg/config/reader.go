@@ -4,23 +4,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/goccy/go-yaml"
+	"github.com/fi3te/lions-club-borken-advent-calendar/pkg/common"
 	"github.com/joho/godotenv"
 )
 
-const FileName = "config.yml"
-const EnvVarSmtpHost = "SMTP_HOST"
-const EnvVarSmtpUsername = "SMTP_USERNAME"
-const EnvVarSmtpPassword = "SMTP_PASSWORD"
-
 func ReadConfig() (*Config, error) {
-	yml, err := os.ReadFile(FileName)
+	config, err := common.ReadYaml[Config](FileName)
 	if err != nil {
-		return nil, err
-	}
-
-	var config Config
-	if err := yaml.Unmarshal(yml, &config); err != nil {
 		return nil, err
 	}
 
@@ -36,7 +26,7 @@ func ReadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 func readSmtpConfig() SmtpConfig {

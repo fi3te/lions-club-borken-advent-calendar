@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const FileName = "config.yml"
+const EnvVarSmtpHost = "SMTP_HOST"
+const EnvVarSmtpUsername = "SMTP_USERNAME"
+const EnvVarSmtpPassword = "SMTP_PASSWORD"
+
 type SmtpConfig struct {
 	Host     string
 	Username string
@@ -77,7 +82,7 @@ func (cfg *Config) validate() error {
 	return cfg.Email.validate()
 }
 
-func (cfg *Config) NextExecution() time.Time {
+func (cfg *Config) TodaysPlannedExecutionTime() time.Time {
 	t, _ := parseTime(cfg.Time)
 	now := time.Now()
 	execution := time.Date(
@@ -85,11 +90,7 @@ func (cfg *Config) NextExecution() time.Time {
 		t.Hour(), t.Minute(), 0, 0,
 		cfg.getLocation(),
 	)
-	if execution.After(now) {
-		return execution
-	} else {
-		return execution.AddDate(0, 0, 1)
-	}
+	return execution
 }
 
 func (cfg *Config) getLocation() *time.Location {

@@ -7,3 +7,4 @@ services:
     volumes:
       - ./.env:/app/.env
       - ./config.yml:/app/config.yml
+#      - ./state.yml:/app/state.yml
