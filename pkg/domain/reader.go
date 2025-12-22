@@ -2,6 +2,8 @@ package domain
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/fi3te/lions-club-borken-advent-calendar/pkg/config"
@@ -46,10 +48,11 @@ func getAdventCalendar(cfg *config.Config) ([]*AdventCalendarDoor, error) {
 }
 
 func readAdventCalendar(n *html.Node) ([]*AdventCalendarDoor, error) {
-	nodesForEachDay, err := webpage.SplitDiv(n, SeparatorElement)
+	nodes, err := webpage.SplitDiv(n, SeparatorElement)
 	if err != nil {
 		return nil, fmt.Errorf("html element could not be split: %v", err)
 	}
+	nodesForEachDay, err := groupMultipleEntriesByDay(nodes)
 	adventCalendar := make([]*AdventCalendarDoor, len(nodesForEachDay))
 	for i, node := range nodesForEachDay {
 		str, err := webpage.RenderNode(node)
@@ -62,4 +65,46 @@ func readAdventCalendar(n *html.Node) ([]*AdventCalendarDoor, error) {
 		}
 	}
 	return adventCalendar, nil
+}
+
+// groupMultipleEntriesByDay merges multiple nodes for a day into one. No merging takes place for days with separate
+// nodes.
+func groupMultipleEntriesByDay(nodes []*html.Node) ([]*html.Node, error) {
+	var nodesForEachDay [24]*html.Node
+	for _, node := range nodes {
+		str, err := webpage.RenderNode(node)
+		if err != nil {
+			return nil, fmt.Errorf("html element could not be rendered: %v", err)
+		}
+		day, err := findDay(str)
+		if err != nil {
+			return nil, err
+		}
+		dayIndex := day - 1
+		if existing := nodesForEachDay[dayIndex]; existing != nil {
+			nodesForEachDay[dayIndex] = webpage.AddToNewDiv(existing, node)
+		} else {
+			nodesForEachDay[dayIndex] = node
+		}
+	}
+	result := make([]*html.Node, 0, 24)
+	for _, node := range nodesForEachDay {
+		if node != nil {
+			result = append(result, node)
+		}
+	}
+	return result, nil
+}
+
+func findDay(text string) (day int, err error) {
+	datePattern := regexp.MustCompile(`(\d{1,2})\.\s+Dezember`)
+	m := datePattern.FindStringSubmatch(text)
+	if len(m) != 2 {
+		return 0, fmt.Errorf("could not find date in string '%s'", text)
+	}
+	day, err = strconv.Atoi(m[1])
+	if err != nil {
+		return 0, err
+	}
+	return day, nil
 }
